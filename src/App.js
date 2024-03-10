@@ -1,25 +1,87 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { lazy, Suspense } from "react";
+import Header from "./components/Header";
+import Body from "./components/Body";
+import Footer from "./components/Footer";
+// import About from "./About";
+import Contact from "./Contact";
+import Error from "./Error";
+import Profile from "./components/Profile";
+import RestaurantMenu from "./components/RestaurantMenu";
+import Shimmer from "./components/Shimmer";
+import { createBrowserRouter, Outlet } from "react-router-dom";
+// import UserContext from "./utils/UserContext";
+import { Provider } from "react-redux";
+import store from "./utils/store";
 
-function App() {
+const About = lazy(()=>import("./About"))
+const Instamart = lazy(() => import("./components/Instamart"));
+
+
+
+const App = () => {
+
+  // const [user, setUser] = useState({
+  //   name:"srinu",
+  //   email:"srinu@gmail.com"
+  // })
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <Provider store={store}>
+    {/* <UserContext.Provider
+     value={{
+      user:user,  
+      setUser:setUser,
+      }}> */}
+    <Header/>
+    <Outlet/>
+    <Footer/>
+    {/* </UserContext.Provider> */}
+    </Provider>
+  )
 }
 
-export default App;
+const AppRouter = createBrowserRouter([
+  {
+    path:"/",
+    element: <App/>,
+    errorElement:<Error/>,
+    children:[
+      {
+          path:"/",
+          element: <Body/>
+      },
+      {
+        path:"/about",
+        element:
+       <Suspense fallback={<div>Loading...</div>}>
+         <About/>,
+         </Suspense>,
+        
+        children:[
+          {
+            path:"profile",
+            element:<Profile/>,
+          },
+        ]
+      },
+      {
+        path:"/contact",
+        element: <Contact/>,
+      },
+      {
+        path:"/restaurant/:resId",
+        element:<RestaurantMenu/>,
+      },
+      {
+        path:"instamart",
+        element:
+          <Suspense fallback={<Shimmer/>}>
+        <Instamart/>
+        </Suspense>
+      },
+    ],
+  },
+])
+
+export default AppRouter;
